@@ -20,9 +20,7 @@ services:
     restart: unless-stopped
 
   user-service:
-    build:
-      context: ../backend
-      dockerfile: user-service/Dockerfile
+    image: pisithly/backend-user-service:latest
     container_name: user-service
     ports:
       - "8080:8080"
@@ -39,9 +37,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: ../fronted
-      dockerfile: Dockerfile
+    image: pisithly/fronted-frontend:latest
     container_name: khmermarket-frontend
     ports:
       - "3000:3000"
