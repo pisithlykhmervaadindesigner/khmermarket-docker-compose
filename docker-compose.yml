@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:17
-    container_name: postgres
+    image: postgres:15-alpine
+    container_name: khmermarket-postgres
     environment:
       POSTGRES_DB: khmermarket_db
       POSTGRES_USER: postgres
@@ -22,7 +20,13 @@ services:
     restart: unless-stopped
 
   user-service:
-    image: pisithly/backend-user-service:latest
+    build:
+      context: ../backend
+      dockerfile: user-service/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    platform: linux/amd64
     container_name: user-service
     ports:
       - "8080:8080"
@@ -30,6 +34,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/khmermarket_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_PROFILES_ACTIVE: dev
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,12 +43,22 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: pisithly/fronted-frontend:latest
-    container_name: frontend
+    build:
+      context: ../fronted
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    platform: linux/amd64
+    container_name: khmermarket-frontend
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://localhost:8080
+      API_BASE_URL: ${API_BASE_URL:-http://user-service:8080}
+      NUXT_PUBLIC_API_BASE_URL: ${API_BASE_URL:-http://user-service:8080}
+      APP_NAME: KhmerMarket
+      NUXT_PUBLIC_APP_NAME: KhmerMarket
+      NODE_ENV: production
     depends_on:
       - user-service
     networks:
