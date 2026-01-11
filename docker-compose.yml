@@ -42,8 +42,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      API_BASE_URL: ${API_BASE_URL:-http://user-service:8080}
-      NUXT_PUBLIC_API_BASE_URL: ${API_BASE_URL:-http://user-service:8080}
+      API_BASE_URL: http://167.172.92.243:8080
+      NUXT_PUBLIC_API_BASE_URL: http://167.172.92.243:8080
       APP_NAME: KhmerMarket
       NUXT_PUBLIC_APP_NAME: KhmerMarket
       NODE_ENV: production
