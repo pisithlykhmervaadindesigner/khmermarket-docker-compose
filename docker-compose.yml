@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    environment:
+      POSTGRES_DB: khmermarket_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d khmermarket_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - khmermarket-network
+    restart: unless-stopped
+
+  user-service:
+    image: pisithly/backend-user-service:latest
+    container_name: user-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/khmermarket_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - khmermarket-network
+    restart: unless-stopped
+
+  frontend:
+    image: pisithly/fronted-frontend:latest
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:8080
+    depends_on:
+      - user-service
+    networks:
+      - khmermarket-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  khmermarket-network:
+    driver: bridge
